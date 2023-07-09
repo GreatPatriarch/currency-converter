@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Currency Converter</title>
+    <style>
+        select {
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+<h1>Currency Converter</h1>
+
+<label for="fromCurrency">From:</label>
+<select id="fromCurrency"></select>
+<input type="number" id="fromValue" placeholder="Enter amount">
+
+<label for="toCurrency">To:</label>
+<select id="toCurrency"></select>
+<input type="number" id="toValue" placeholder="Converted value" readonly>
+
+<button onclick="convertCurrency()">Convert</button>
+
+<script>
+    const fromCurrencySelect = document.getElementById('fromCurrency');
+    const toCurrencySelect = document.getElementById('toCurrency');
+
+    window.onload = async () => {
+        try {
+            const response = await fetch('https://localhost:8080/currencies/all');
+            if (response.ok) {
+                const currencies = await response.json();
+                console.log(currencies);  // Log the returned currencies to console
+                populateSelectOptions(currencies);
+            } else {
+                throw new Error(`Server returned HTTP ${response.status}`);
+            }
+        } catch (err) {
+            console.error("Failed to fetch currencies", err);
+        }
+    }
+
+    function populateSelectOptions(currencies) {
+        currencies.forEach(currency => {
+            const option1 = document.createElement('option');
+            const option2 = document.createElement('option');
+            option1.textContent = option2.textContent = currency.name;
+            option1.value = option2.value = currency.name;
+            fromCurrencySelect.appendChild(option1);
+            toCurrencySelect.appendChild(option2);
+        });
+    }
+
+    async function convertCurrency() {
+        const fromCurrency = fromCurrencySelect.value;
+        const toCurrency = toCurrencySelect.value;
+        const fromValue = document.getElementById('fromValue').value;
+
+        const requestData = {
+            from: fromCurrency,
+            to: toCurrency,
+            value: fromValue
+        };
+
+        try {
+            const response = await fetch('http://localhost:8080/currencies/convert', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                document.getElementById('toValue').value = result;
+            } else {
+                throw new Error(`Server returned HTTP ${response.status}`);
+            }
+        } catch (err) {
+            console.error("Failed to fetch conversion result", err);
+        }
+    }
+</script>
+</body>
+</html>
