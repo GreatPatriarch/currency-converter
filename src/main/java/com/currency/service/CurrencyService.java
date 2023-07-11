@@ -6,6 +6,8 @@ import com.currency.repository.CurrencyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +27,10 @@ public class CurrencyService {
         if (currencyConversion.getTo() != null && currencyConversion.getFrom() != null && currencyConversion.getValue() >= 0) {
             var currencyConvertibleValue = currencyRepository.findById(currencyConversion.getFrom().toUpperCase()).orElseThrow();
             var currencyConvertValue = currencyRepository.findById(currencyConversion.getTo().toUpperCase()).orElseThrow();
-            return Optional.of((currencyConvertValue.getValueInEuros() * currencyConversion.getValue() / currencyConvertibleValue.getValueInEuros()) );
+            var tempResult = currencyConvertValue.getValueInEuros() * currencyConversion.getValue() / currencyConvertibleValue.getValueInEuros();
+            var bigDecimal = new BigDecimal(Double.toString(tempResult));
+            bigDecimal = bigDecimal.setScale(2, RoundingMode.HALF_UP);
+            return Optional.of(bigDecimal.doubleValue());
         }
         return Optional.empty();
     }

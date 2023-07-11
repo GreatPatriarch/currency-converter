@@ -16,14 +16,17 @@ public class CurrencyTask {
     private final CurrencyRepository currencyRepository;
     @Value("${fixer-io-api-key}")
     private String fixerApiKey;
+
     @SneakyThrows
     @Scheduled(fixedRate = 2 * 1000 * 60 * 60)
     public void getRatesTask() {
         var restTemplate = new RestTemplate();
         var forObject = restTemplate.getForObject(fixerApiKey, CurrencyDTO.class);
-        forObject.getRates().forEach((key, value) -> {
-            var currency = new Currency(key, value);
-            this.currencyRepository.save(currency);
-        });
+        if (forObject != null && forObject.getRates() != null) {
+            forObject.getRates().forEach((key, value) -> {
+                Currency currency = new Currency(key, value);
+                currencyRepository.save(currency);
+            });
+        }
     }
 }

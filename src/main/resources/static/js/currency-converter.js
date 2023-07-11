@@ -21,30 +21,17 @@ function fillCurrency( dropdown,jsonParsed) {
         option.innerText = jsonParsed[i].name;
         dropdown.appendChild(option);
     }
-}
 
-function filterFunction(inputId, dropdownId) {
-    const inputElement = document.getElementById(inputId);
-    const filter = inputElement.value.toUpperCase();
-    const dropdown = document.getElementById(dropdownId);
-    const options = dropdown.getElementsByTagName('option');
-
-    for (let i = 0; i < options.length; i++) {
-        const txtValue = options[i].innerText || options[i].textContent;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            options[i].style.display = '';
-        } else {
-            options[i].style.display = 'none';
-        }
-    }
+    $('.selectpicker').selectpicker('refresh');
 }
 
 $("#convertButton").click(function() {
 
-    var from = $('#fromInput').val(); // change to val()
-    var to = $('#toInput').val(); // change to val()
+    var from = $('#fromInput').val();
+    var to = $('#toInput').val();
     var value = $('#amountInput').val();
 
+    // Make the AJAX call
     $.ajax({
         type: "POST",
         url: "/currencies/convert",
@@ -55,7 +42,6 @@ $("#convertButton").click(function() {
         }),
         contentType: "application/json;",
         success: function (data) {
-            console.log(data)
             $("#convertResult").val(data);
         },
         error: function (data) {
